@@ -15,7 +15,7 @@ namespace шарпы_1._2_лаба
 
         public IEnumerable<T> nodes => throw new NotImplementedException();
 
-        public void add(T node)
+        public void Add(T node)
         {
             throw new NotImplementedException();
         }

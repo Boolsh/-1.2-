@@ -11,7 +11,7 @@ namespace шарпы_1._2_лаба
         int Count { get; }
         bool isEmpty { get; }
         IEnumerable<T> nodes { get; }
-        void add(T node);
+        void Add(T node);
         void Clear();
         bool Contains(T node);
         bool Remove(T node);
