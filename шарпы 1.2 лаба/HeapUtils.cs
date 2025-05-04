@@ -33,18 +33,17 @@ namespace шарпы_1._2_лаба
         }
         static bool CheckForAll<T>(IHeap<T> heap, CheckDelegate<T> check) 
         {
-            foreach (var i in heap)
+            foreach (var i in heap) 
                 if (!check(i)) return false;
             return true;
         }
-
-        static readonly HeapConstructorDelegate<T> ArrayHeapConstructor = (collection) => 
-        {
-            ArrayHeap<T> res = new ArrayHeap<T>();
-            foreach (var i in collection)
-                res.Add(i);
-            return res;
-        };
+        //static readonly HeapConstructorDelegate<T> ArrayHeapConstructor = (collection) => 
+        //{
+        //    ArrayHeap<T> res = new ArrayHeap<T>();
+        //    foreach (var i in collection)
+        //        res.Add(i);
+        //    return res;
+        //};
         static readonly HeapConstructorDelegate<T> LinkedHeapConstructor = (collection) =>
         {
             LinkedHeap<T> res = new LinkedHeap<T>();
@@ -52,6 +51,7 @@ namespace шарпы_1._2_лаба
                 res.Add(item);
             return res;
         };
+
 
     }
 }

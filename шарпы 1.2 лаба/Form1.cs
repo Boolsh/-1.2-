@@ -16,5 +16,7 @@ namespace шарпы_1._2_лаба
         {
             InitializeComponent();
         }
+
+
     }
 }
