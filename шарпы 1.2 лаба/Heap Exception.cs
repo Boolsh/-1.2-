@@ -4,9 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace шарпы_1._2_лаба
+namespace HeapSolution
 {
     internal class Heap_Exception
     {
+        internal class HeapException : Exception
+        {
+            public HeapException() { }
+            public HeapException(string message) : base(message) { }
+        }
+
+        internal class UnmutableHeapException : HeapException
+        {
+            public UnmutableHeapException() : base("Изменение списка запрещено") { }
+        }
     }
 }

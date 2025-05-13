@@ -4,81 +4,64 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
-namespace шарпы_1._2_лаба
+namespace HeapSolution
 {
-    internal class ArrayHeap<T> : IHeap<T> where T : IComparable<T>
+    public class ArrayHeap<T> : IHeap<T>
     {
         private T[] _heap;
         private int _capacity;
         private int _size = 0;
-
-        public ArrayHeap() : this(4){}
-        public ArrayHeap(int capacity)
+        private readonly IComparer<T> _comparer;
+        public ArrayHeap(int capacity = 4, IComparer<T> comparer = null)
         {
-            _capacity = capacity;
-            _heap = new T[capacity];
+            _comparer = comparer ?? Comparer<T>.Default;
+            if (_comparer == null)
+                throw new InvalidOperationException($"No default comparer for {typeof(T).Name}");
+
+            _capacity = capacity > 0 ? capacity : 4;
+            _heap = new T[_capacity];
+            _size = 0;
         }
 
-        public void PrintHeapAsTree()
+        //private int Compare(T a, T b) => _comparer.Compare(a, b);
+        public void PrintHorizontal(TextBox textBox)
         {
+            textBox.Clear();
             if (_size == 0)
             {
-                Console.WriteLine("Heap is empty");
+                textBox.Text = "Куча пуста";
                 return;
             }
+            PrintTree(textBox, 0, 0);
+        }
 
-            // Вычисляем максимальную глубину кучи
-            int levels = (int)Math.Log(_size, 2) + 1;
+        private void PrintTree(TextBox textBox, int index, int level)
+        {
+            if (index >= _size) return;
 
-            // Максимальная ширина последнего уровня (2^(levels-1) элементов)
-            int lastLevelWidth = (int)Math.Pow(2, levels - 1);
+            // Сначала правый потомок
+            int rightChild = 2 * index + 2;
+            PrintTree(textBox, rightChild, level + 1);
 
-            // Общая ширина для центрирования (умножаем на 3, так как каждый элемент занимает ~3 символа)
-            int totalWidth = lastLevelWidth * 3;
+            // Текущий элемент с отступами
+            textBox.Text += new string(' ', level * 4) + _heap[index] + Environment.NewLine;
 
-            int currentIndex = 0;
-
-            for (int level = 0; level < levels; level++)
-            {
-                int elementsOnLevel = (int)Math.Pow(2, level);
-                int spacing = totalWidth / (elementsOnLevel + 1);
-
-                for (int i = 0; i < elementsOnLevel && currentIndex < _size; i++, currentIndex++)
-                {
-                    // Центрируем каждый элемент на своем месте
-                    Console.Write(new string(' ', spacing) + _heap[currentIndex]);
-                }
-                Console.WriteLine();
-
-                // Рисуем соединительные линии между уровнями
-                if (level < levels - 1 && currentIndex < _size)
-                {
-                    int nextLevelElements = (int)Math.Pow(2, level + 1);
-                    int nextSpacing = totalWidth / (nextLevelElements + 1);
-
-                    for (int i = 0; i < elementsOnLevel; i++)
-                    {
-                        int pos = spacing * (i + 1);
-                        Console.Write(new string(' ', pos - 1) + "/\\");
-                    }
-                    Console.WriteLine();
-                }
-            }
+            // Левый потомок
+            int leftChild = 2 * index + 1;
+            PrintTree(textBox, leftChild, level + 1);
         }
         public void print_to_console()
         {
-            foreach (T i in _heap)
-                Console.Write(i + " ");
+            for (int i = 0; i < _size; ++i)
+                Console.Write(_heap[i] + " ");
             Console.WriteLine();
             
         }
         public int Count => _size;  // Текущее количество элементов
-
         public bool isEmpty => _size == 0;  // Проверка на пустоту
-
         public IEnumerable<T> nodes => _heap.Take(_size); // Перечисление элементов
-
         public void Add(T node)
         {
             if (_size == _capacity) Resize();
@@ -87,33 +70,34 @@ namespace шарпы_1._2_лаба
             HeapifyUp(_size);
             _size++;
         }
-
         public void Clear()
         {
             _size= 0;
             Array.Clear(_heap, 0, _capacity);
         }
-
         public bool Contains(T node)
         {
-            throw new NotImplementedException();
+            foreach (T i in _heap)
+                if (_comparer.Compare(node, i) == 0)
+                    return true;
+            return false;
         }
-
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < _size; i++)
+                yield return _heap[i];
         }
-
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         public bool Remove(T node)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < _size; ++i )
+                if (_comparer.Compare(node, _heap[i]) == 0)
+                {
+                    RemoveAt(i);
+                    return true; 
+                }
+            return false;
         }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
         private void Resize()
         {
             _capacity *= 2;  // Удваиваем ёмкость
@@ -121,20 +105,50 @@ namespace шарпы_1._2_лаба
             Array.Copy(_heap, newHeap, _heap.Length);
             _heap = newHeap;
         }
+        private void RemoveAt(int index)
+        {
+            _size--;
+            _heap[index] = _heap[_size];  // Заменяем удаляемый элемент последним
+            _heap[_size] = default(T);    // Очищаем последнюю позицию
+            HeapifyDown(index);           // Восстанавливаем свойства кучи
+        }
+        private void HeapifyDown(int index)
+        {
+            int leftChildIndex = get_lChild_index(index);
+            int rightChildIndex = get_rChild_index(index);
+            int largestIndex = index;  // Индекс максимального элемента
+
+            // Сравниваем с левым потомком (должно быть < 0 для max-кучи)
+            if (leftChildIndex < _size && _comparer.Compare(_heap[largestIndex], _heap[leftChildIndex]) < 0)
+            {
+                largestIndex = leftChildIndex;
+            }
+
+            // Сравниваем с правым потомком (должно быть < 0 для max-кучи)
+            if (rightChildIndex < _size && _comparer.Compare(_heap[largestIndex], _heap[rightChildIndex]) < 0)
+            {
+                largestIndex = rightChildIndex;
+            }
+
+            // Если нашли большего потомка - меняем местами и продолжаем
+            if (largestIndex != index)
+            {
+                Swap(index, largestIndex);
+                HeapifyDown(largestIndex);
+            }
+        }
+
         private void HeapifyUp(int i)
         {
             int parentInd = get_parent_index(i);
             if (parentInd < 0) return;
-            
-            if (_heap[i].CompareTo(_heap[parentInd]) > 0)
+
+            // Должно быть > 0 для max-кучи (текущий элемент больше родителя)
+            if (_comparer.Compare(_heap[i], _heap[parentInd]) > 0)
             {
                 Swap(i, parentInd);
                 HeapifyUp(parentInd);
             }
-        }
-        private void HeapifyDown() 
-        {
-
         }
         private void Swap(int a, int b)
         {

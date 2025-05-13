@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+//using static HeapSolution.HeapUtils<T>;
 
-namespace шарпы_1._2_лаба
+namespace HeapSolution
 {
     internal class HeapUtils<T>
     {
@@ -12,44 +13,69 @@ namespace шарпы_1._2_лаба
         public delegate bool CheckDelegate<T>(T date);
         public delegate IHeap<T> HeapConstructorDelegate<T>(IEnumerable<T> collection);
         public delegate void ActionDelegate<T>(T date);
-        static bool Exists<T>(IHeap<T> heap, CheckDelegate<T> check) 
+        public delegate TO ConvertDelegate<TI, TO>(TI elem);
+        public static bool Exists<T>(IHeap<T> heap, CheckDelegate<T> check) 
         {
             foreach (var i in heap)
                 if (check(i)) return true;
             return false;
 
         }
-        static IHeap<T> FindAll<T>(IHeap<T> heap, CheckDelegate<T> check, HeapConstructorDelegate<T> conDel) 
+        public static IHeap<T> FindAll(IHeap<T> heap, CheckDelegate<T> check, HeapConstructorDelegate<T> constructor)
         {
-            IHeap<T> res = conDel(null);
-            foreach (var i in heap)
-                if (check(i)) res.Add(i);
-            return res; 
+            if (heap == null || heap.isEmpty)
+                return constructor(new List<T>()); // Возвращаем пустую кучу
+
+            List<T> filteredItems = new List<T>();
+            foreach (var item in heap)
+            {
+                if (check(item))
+                    filteredItems.Add(item);
+            }
+
+            return constructor(filteredItems);
         }
-        static void ForEach(IHeap<T> heap, ActionDelegate<T> actDel) 
+
+        public static void ForEach(IHeap<T> heap, ActionDelegate<T> actDel) 
         {
             foreach (var i in heap)
                 actDel(i);
         }
-        static bool CheckForAll<T>(IHeap<T> heap, CheckDelegate<T> check) 
+        //public static IList<TO> ConvertAll<TI, TO>(IList<TI> inputList, ConvertDelegate<TI, TO> converter, HeapConstructorDelegate<TO> constructor)
+        //{
+        //    LinkedList<TO> convertedList = new LinkedList<TO>();
+        //    foreach (var item in inputList)
+        //    {
+        //        convertedList.Add(converter(item));
+        //    }
+        //    return constructor(convertedList);
+        //}
+        public static bool CheckForAll<T>(IHeap<T> heap, CheckDelegate<T> check) 
         {
             foreach (var i in heap) 
                 if (!check(i)) return false;
             return true;
         }
-        //static readonly HeapConstructorDelegate<T> ArrayHeapConstructor = (collection) => 
-        //{
-        //    ArrayHeap<T> res = new ArrayHeap<T>();
-        //    foreach (var i in collection)
-        //        res.Add(i);
-        //    return res;
-        //};
-        static readonly HeapConstructorDelegate<T> LinkedHeapConstructor = (collection) =>
+        public static readonly HeapConstructorDelegate<T> ArrayHeapConstructor = collection =>
         {
-            LinkedHeap<T> res = new LinkedHeap<T>();
-            foreach (var item in collection)
-                res.Add(item);
-            return res;
+            var heap = new ArrayHeap<T>();
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                    heap.Add(item);
+            }
+            return heap;
+        };
+
+        public static readonly HeapConstructorDelegate<T> LinkedHeapConstructor = collection =>
+        {
+            var heap = new LinkedHeap<T>();
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                    heap.Add(item);
+            }
+            return heap;
         };
 
 

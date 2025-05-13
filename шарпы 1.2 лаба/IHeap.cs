@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace шарпы_1._2_лаба
+namespace HeapSolution
 {
     internal interface IHeap<T> : IEnumerable<T>
     {

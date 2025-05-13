@@ -4,45 +4,253 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml.Linq;
 
-namespace шарпы_1._2_лаба
+namespace HeapSolution
 {
-    internal class LinkedHeap<T> : IHeap<T>
+
+    public class LinkedHeap<T> : IHeap<T>
     {
-        public int Count => throw new NotImplementedException();
-
-        public bool isEmpty => throw new NotImplementedException();
-
-        public IEnumerable<T> nodes => throw new NotImplementedException();
-
-        public void Add(T node)
+        private class Node
         {
-            throw new NotImplementedException();
+            public T Data { get; set; }
+            public Node Next { get; set; }
+            public int Index { get; set; } // Добавляем индекс узла
+
+            public Node(T data, int index)
+            {
+                Data = data;
+                Index = index;
+            }
+        }
+
+        private Node _head, _tail;
+        private readonly IComparer<T> _comparer;
+        private int _size;
+
+        public void PrintSimple()
+        {
+            Node cur = _head;
+            while (cur != null)
+            {
+                Console.Write(cur.Data + " ");
+                cur = cur.Next;
+            }
+            Console.WriteLine();
+            //Console.WriteLine(_head.Data);
+            //Console.WriteLine(_size);
+        }
+        public void PrintHorizontal(TextBox textBox)
+        {
+            textBox.Clear();
+            if (_head == null)
+            {
+                textBox.Text = "Куча пуста";
+                return;
+            }
+
+            List<T> elements = new List<T>();
+            Node current = _head;
+            while (current != null)
+            {
+                elements.Add(current.Data);
+                current = current.Next;
+            }
+
+            PrintTree(textBox, elements, 0, 0);
+        }
+
+        private void PrintTree(TextBox textBox, List<T> elements, int index, int level)
+        {
+            if (index >= elements.Count) return;
+
+            int rightChild = 2 * index + 2;
+            PrintTree(textBox, elements, rightChild, level + 1);
+
+            textBox.Text += new string(' ', level * 4) + elements[index] + Environment.NewLine;
+
+            int leftChild = 2 * index + 1;
+            PrintTree(textBox, elements, leftChild, level + 1);
+        }
+
+        public LinkedHeap(IComparer<T> comparer = null)
+        {
+            _comparer = comparer ?? Comparer<T>.Default;
+            if (_comparer == null)
+                throw new InvalidOperationException($"No default comparer for {typeof(T).Name}");
+        }
+        public int Count => _size;
+
+        public bool isEmpty => _size == 0;
+
+        public IEnumerable<T> nodes
+        {
+            get
+            {
+                Node current = _head;
+                while (current != null)
+                {
+                    yield return current.Data;
+                    current = current.Next;
+                }
+            }
+        }
+        public void Add(T item)
+        {
+            var newNode = new Node(item, _size);
+
+            if (_head == null)
+            {
+                _head = _tail = newNode;
+            }
+            else
+            {
+                _tail.Next = newNode;
+                _tail = newNode;
+            }
+
+            _size++;
+            HeapifyUp(_tail);
         }
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            _head = _tail = null;
+            _size = 0;
         }
 
-        public bool Contains(T node)
+        public bool Contains(T item)
         {
-            throw new NotImplementedException();
+            Node current = _head;
+            while (current != null) // Проверяем все элементы
+            {
+                if (_comparer.Compare(current.Data, item) == 0)
+                    return true;
+                current = current.Next;
+            }
+            return false;
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            Node current = _head;
+            while (current != null)
+            {
+                yield return current.Data;
+                current = current.Next;
+            }
         }
 
-        public bool Remove(T node)
+        public bool Remove(T item)
         {
-            throw new NotImplementedException();
+            if (_size == 0) return false;
+
+            // Находим узел для удаления
+            Node nodeToRemove = FindNode(item);
+            if (nodeToRemove == null) return false;
+
+            // Заменяем удаляемый элемент последним
+            nodeToRemove.Data = _tail.Data;
+
+            // Удаляем последний узел
+            RemoveLastNode();
+
+            // Восстанавливаем свойства кучи
+            HeapifyDown(nodeToRemove);
+
+            return true;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        private void HeapifyUp(Node node)
         {
-            throw new NotImplementedException();
+            while (node.Index > 0)
+            {
+                int parentIndex = (node.Index - 1) / 2;
+                Node parent = GetNodeAt(parentIndex);
+
+                if (_comparer.Compare(node.Data, parent.Data) <= 0) break;
+
+                SwapNodes(node, parent);
+                node = parent;
+            }
         }
+
+        private void HeapifyDown(Node node)
+    {
+        while (true)
+        {
+            int leftChildIndex = 2 * node.Index + 1;
+            int rightChildIndex = 2 * node.Index + 2;
+            
+            Node largest = node;
+            
+            if (leftChildIndex < _size)
+            {
+                Node leftChild = GetNodeAt(leftChildIndex);
+                if (_comparer.Compare(leftChild.Data, largest.Data) > 0)
+                    largest = leftChild;
+            }
+            
+            if (rightChildIndex < _size)
+            {
+                Node rightChild = GetNodeAt(rightChildIndex);
+                if (_comparer.Compare(rightChild.Data, largest.Data) > 0)
+                    largest = rightChild;
+            }
+            
+            if (largest == node) break;
+            
+            SwapNodes(node, largest);
+            node = largest;
+        }
+    }
+
+    private Node GetNodeAt(int index)
+    {
+        if (index < 0 || index >= _size) return null;
+        
+        Node current = _head;
+        while (current != null && current.Index != index)
+        {
+            current = current.Next;
+        }
+        return current;
+    }
+
+    private Node FindNode(T item)
+    {
+        Node current = _head;
+        while (current != null)
+        {
+            if (_comparer.Compare(current.Data, item) == 0)
+                return current;
+            current = current.Next;
+        }
+        return null;
+    }
+
+    private void RemoveLastNode()
+    {
+        if (_size == 1)
+        {
+            _head = _tail = null;
+        }
+        else
+        {
+            Node newTail = GetNodeAt(_size - 2);
+            newTail.Next = null;
+            _tail = newTail;
+        }
+        _size--;
+    }
+
+    private void SwapNodes(Node a, Node b)
+    {
+        T temp = a.Data;
+        a.Data = b.Data;
+        b.Data = temp;
+    }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

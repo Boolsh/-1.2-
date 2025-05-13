@@ -4,45 +4,61 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static HeapSolution.Heap_Exception;
 
-namespace шарпы_1._2_лаба
+namespace HeapSolution
 {
     internal class UnmutableHeap<T> : IHeap<T>
     {
-        public int Count => throw new NotImplementedException();
+        private readonly IHeap<T> _wrappedHeap;
 
-        public bool isEmpty => throw new NotImplementedException();
+        public UnmutableHeap(IHeap<T> heapToWrap)
+        {
+            _wrappedHeap = heapToWrap ?? throw new ArgumentNullException(nameof(heapToWrap));
+        }
 
-        public IEnumerable<T> nodes => throw new NotImplementedException();
+        public int Count => _wrappedHeap.Count;
+        public bool isEmpty => _wrappedHeap.isEmpty;
+        public IEnumerable<T> nodes => _wrappedHeap.nodes;
 
         public void Add(T node)
         {
-            throw new NotImplementedException();
+            throw new UnmutableHeapException();
         }
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            throw new UnmutableHeapException();
         }
 
         public bool Contains(T node)
         {
-            throw new NotImplementedException();
+            return _wrappedHeap.Contains(node);
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            return _wrappedHeap.GetEnumerator();
         }
 
         public bool Remove(T node)
         {
-            throw new NotImplementedException();
+            throw new UnmutableHeapException();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return GetEnumerator();
         }
+
+        // Дополнительные методы для удобства
+        public T PeekMax()
+        {
+            if (isEmpty)
+                throw new InvalidOperationException("Heap is empty");
+            return _wrappedHeap.nodes.First();
+        }
+
+
     }
 }
