@@ -16,7 +16,8 @@ namespace HeapSolution
         {
             public T Data { get; set; }
             public Node Next { get; set; }
-            public int Index { get; set; } // Добавляем индекс узла
+            public int Index { get; set; } 
+            public Node Parent { get; set; } 
 
             public Node(T data, int index)
             {
@@ -29,6 +30,18 @@ namespace HeapSolution
         private readonly IComparer<T> _comparer;
         private int _size;
 
+        public void CopyTo(IHeap<T> targetHeap)
+        {
+            if (targetHeap == null) throw new ArgumentNullException(nameof(targetHeap));
+
+            targetHeap.Clear();
+            Node current = _head;
+            while (current != null)
+            {
+                targetHeap.Add(current.Data);
+                current = current.Next;
+            }
+        }
         public void PrintSimple()
         {
             Node cur = _head;
@@ -76,8 +89,7 @@ namespace HeapSolution
         public LinkedHeap(IComparer<T> comparer = null)
         {
             _comparer = comparer ?? Comparer<T>.Default;
-            if (_comparer == null)
-                throw new InvalidOperationException($"No default comparer for {typeof(T).Name}");
+
         }
         public int Count => _size;
 
@@ -122,7 +134,7 @@ namespace HeapSolution
         public bool Contains(T item)
         {
             Node current = _head;
-            while (current != null) // Проверяем все элементы
+            while (current != null) 
             {
                 if (_comparer.Compare(current.Data, item) == 0)
                     return true;
@@ -145,17 +157,13 @@ namespace HeapSolution
         {
             if (_size == 0) return false;
 
-            // Находим узел для удаления
             Node nodeToRemove = FindNode(item);
             if (nodeToRemove == null) return false;
 
-            // Заменяем удаляемый элемент последним
             nodeToRemove.Data = _tail.Data;
 
-            // Удаляем последний узел
             RemoveLastNode();
 
-            // Восстанавливаем свойства кучи
             HeapifyDown(nodeToRemove);
 
             return true;
@@ -205,18 +213,6 @@ namespace HeapSolution
         }
     }
 
-    private Node GetNodeAt(int index)
-    {
-        if (index < 0 || index >= _size) return null;
-        
-        Node current = _head;
-        while (current != null && current.Index != index)
-        {
-            current = current.Next;
-        }
-        return current;
-    }
-
     private Node FindNode(T item)
     {
         Node current = _head;
@@ -243,8 +239,18 @@ namespace HeapSolution
         }
         _size--;
     }
+    private Node GetNodeAt(int index)
+    {
+        if (index < 0 || index >= _size) return null;
 
-    private void SwapNodes(Node a, Node b)
+        Node current = _head;
+        while (current != null && current.Index != index)
+        {
+            current = current.Next;
+        }
+        return current;
+    }
+        private void SwapNodes(Node a, Node b)
     {
         T temp = a.Data;
         a.Data = b.Data;

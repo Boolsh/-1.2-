@@ -304,8 +304,13 @@ namespace HeapSolution
                     intHeap.Clear();
                     foreach (var elem in items)
                     {
-                        intHeap.Add(elem*2);
+                        intHeap.Add(elem * 2);
                     }
+                    //var temp =;
+
+                    //HeapUtils<int>.ForEach(intHeap, (int x) => { x *= 2; });
+                    //intHeap.CopyTo(temp);
+                    
                     intHeap.PrintHorizontal(textList);
 
                 }

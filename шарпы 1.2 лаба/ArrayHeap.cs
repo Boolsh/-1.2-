@@ -17,9 +17,6 @@ namespace HeapSolution
         public ArrayHeap(int capacity = 4, IComparer<T> comparer = null)
         {
             _comparer = comparer ?? Comparer<T>.Default;
-            if (_comparer == null)
-                throw new InvalidOperationException($"No default comparer for {typeof(T).Name}");
-
             _capacity = capacity > 0 ? capacity : 4;
             _heap = new T[_capacity];
             _size = 0;
@@ -51,7 +48,14 @@ namespace HeapSolution
             int leftChild = 2 * index + 1;
             PrintTree(textBox, leftChild, level + 1);
         }
-
+        public void CopyTo(IHeap<T> targetHeap)
+        { 
+            targetHeap.Clear();
+            foreach (var item in this.nodes)
+            {
+                targetHeap.Add(item);
+            }
+        }
         public void print_to_console()
         {
             for (int i = 0; i < _size; ++i)

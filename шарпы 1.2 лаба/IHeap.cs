@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace HeapSolution
 {
-    internal interface IHeap<T> : IEnumerable<T>
+    public interface IHeap<T> : IEnumerable<T>
     {
         void PrintHorizontal(TextBox textBox);
         int Count { get; }
@@ -17,5 +17,7 @@ namespace HeapSolution
         void Clear();
         bool Contains(T node);
         bool Remove(T node);
+        void CopyTo(IHeap<T> targetHeap);
+
     }
 }

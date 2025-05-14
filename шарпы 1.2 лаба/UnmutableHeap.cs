@@ -11,11 +11,12 @@ namespace HeapSolution
 {
     internal class UnmutableHeap<T> : IHeap<T>
     {
+        
         private readonly IHeap<T> _wrappedHeap;
 
         public UnmutableHeap(IHeap<T> heapToWrap)
         {
-            _wrappedHeap = heapToWrap ?? throw new ArgumentNullException(nameof(heapToWrap));
+            _wrappedHeap = heapToWrap;
         }
 
         public int Count => _wrappedHeap.Count;
@@ -52,6 +53,11 @@ namespace HeapSolution
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public void CopyTo(IHeap<T> targetHeap)
+        {
+            throw new NotImplementedException();
         }
     }
 }
