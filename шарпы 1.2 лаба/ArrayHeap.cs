@@ -28,10 +28,9 @@ namespace HeapSolution
         //private int Compare(T a, T b) => _comparer.Compare(a, b);
         public void PrintHorizontal(TextBox textBox)
         {
-            textBox.Clear();
             if (_size == 0)
             {
-                textBox.Text = "Куча пуста";
+                textBox.AppendText("Куча пуста" + Environment.NewLine);
                 return;
             }
             PrintTree(textBox, 0, 0);
@@ -46,12 +45,13 @@ namespace HeapSolution
             PrintTree(textBox, rightChild, level + 1);
 
             // Текущий элемент с отступами
-            textBox.Text += new string(' ', level * 4) + _heap[index] + Environment.NewLine;
+            textBox.AppendText(new string(' ', level * 4) + _heap[index] + Environment.NewLine);
 
             // Левый потомок
             int leftChild = 2 * index + 1;
             PrintTree(textBox, leftChild, level + 1);
         }
+
         public void print_to_console()
         {
             for (int i = 0; i < _size; ++i)

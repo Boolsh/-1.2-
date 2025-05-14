@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -44,34 +46,23 @@ namespace HeapSolution
 
             if (type == 1 && intHeap != null)
             {
-                if (intHeap is ArrayHeap<int> arrayHeap)
-                    arrayHeap.PrintHorizontal(textList);
-                else if (intHeap is LinkedHeap<int> linkedHeap)
-                    linkedHeap.PrintHorizontal(textList);
-                else
-                    foreach (var item in intHeap)
-                        textList.Text += item + " ";
+                textList.AppendText("Текущая куча (int):" + Environment.NewLine);
+                intHeap.PrintHorizontal(textList);
             }
             else if (type == 2 && stringHeap != null)
             {
-                if (stringHeap is ArrayHeap<string> arrayHeap)
-                    arrayHeap.PrintHorizontal(textList);
-                else if (stringHeap is LinkedHeap<string> linkedHeap)
-                    linkedHeap.PrintHorizontal(textList);
-                else
-                    foreach (var item in stringHeap)
-                        textList.Text += item + " ";
+                textList.AppendText("Текущая куча (string):" + Environment.NewLine);
+                stringHeap.PrintHorizontal(textList);
             }
             else if (type == 3 && personHeap != null)
             {
-                if (personHeap is ArrayHeap<Person> arrayHeap)
-                    arrayHeap.PrintHorizontal(textList);
-                else if (personHeap is LinkedHeap<Person> linkedHeap)
-                    linkedHeap.PrintHorizontal(textList);
-                else
-                    foreach (var item in personHeap)
-                        textList.Text += item + " ";
+                textList.AppendText("Текущая куча (Person):" + Environment.NewLine);
+                personHeap.PrintHorizontal(textList);
             }
+
+            // Прокрутка вниз
+            textList.SelectionStart = textList.Text.Length;
+            textList.ScrollToCaret();
         }
 
         private void CreateBtn_Click(object sender, EventArgs e)
@@ -104,11 +95,14 @@ namespace HeapSolution
                     else if (selectedType == "Linked heap")
                         stringHeap = new LinkedHeap<string>();
 
+                    string[] words = { "Apple", "Banana", "Cherry", "Dragon", "Elephant",
+                                        "Falcon", "Giraffe", "Harbor", "Island", "Jungle",
+                                        "Kitten", "Lemon", "Mountain", "Nebula", "Ocean",
+                                        "Panda", "Quasar", "Rainbow", "Sunset", "Tiger" };
+
                     for (int i = 0; i < rnd.Next(5, 15); i++)
                     {
-                        string res = "";
-                        for (int j = 0; j < rnd.Next(5, 15); j++)
-                            res += (char)('a' + rnd.Next(0, 25));
+                        string res = words[rnd.Next(0,20)];
                         stringHeap.Add(res);
                     }
 
@@ -122,7 +116,7 @@ namespace HeapSolution
                     else if (selectedType == "Linked heap")
                         personHeap = new LinkedHeap<Person>();
 
-                    string[] names = { "Bob", "Alexey", "Mykola", "Ostap", "Maria",
+                    string[] names = { "Valera", "Donald", "Joe", "Zhenya", "Maria",
                                     "Stepan", "Antony", "Olesya", "Oleg", "Svetlana" };
 
                     for (int i = 0; i < rnd.Next(5, 15); i++)
@@ -224,16 +218,16 @@ namespace HeapSolution
                 if (type == 1)
                 {
                     int value = int.Parse(str);
-                    intHeap.Remove(value);
+                    if (!intHeap.Remove(value)) MessageBox.Show("Элемент не найден");
                 }
                 if (type == 2)
                 {
-                    stringHeap.Remove(str);
+                    if (!stringHeap.Remove(str)) MessageBox.Show("Элемент не найден"); ;
                 }
                 if (type == 3)
                 {
                     Person value = new Person(str);
-                    personHeap.Remove(value);
+                    if (!personHeap.Remove(value)) MessageBox.Show("Элемент не найден"); ;
                 }
                 this.textList.Clear();
                 PrintToTextBox();
@@ -302,26 +296,52 @@ namespace HeapSolution
         {
             try
             {
-                textList.Text += Environment.NewLine;
-                if (type == 1)
+                textList.AppendText(Environment.NewLine + "Результат ForEach:" + Environment.NewLine);
+
+                if (type == 1 && intHeap != null)
                 {
-                    textList.Text += "Преобразованный список (значение увеличивается в 2 раза):" + Environment.NewLine;
-                    HeapUtils<int>.ForEach(intHeap, elem => textList.Text += $"{elem * 2}; ");
+                    var items = intHeap.ToList();
+                    intHeap.Clear();
+                    foreach (var elem in items)
+                    {
+                        intHeap.Add(elem*2);
+                    }
+                    intHeap.PrintHorizontal(textList);
+
                 }
-                if (type == 2)
+                else if (type == 2 && stringHeap != null)
                 {
-                    textList.Text += "Преобразованный список (добавлена строка):" + Environment.NewLine;
-                    HeapUtils<string>.ForEach(stringHeap, elem => textList.Text += $"{elem}TEST; ");
+
+                    var items = stringHeap.ToList();
+                    stringHeap.Clear();
+                    foreach (var elem in items)
+                    {
+                        stringHeap.Add(elem + "TEST");
+                    }
+                    stringHeap.PrintHorizontal(textList);
                 }
-                if (type == 3)
+                else if (type == 3 && personHeap != null)
                 {
-                    textList.Text += "Преобразованный список (добавлен 1 год к возрасту):" + Environment.NewLine;
-                    HeapUtils<Person>.ForEach(personHeap, elem => textList.Text += $"{elem++}; ");
+
+                    var items = personHeap.ToList();
+                    personHeap.Clear();
+                    foreach (var elem in items)
+                    {
+                        personHeap.Add(new Person(elem.Name, (byte)(elem.Age + 1)));
+                    }
+                    personHeap.PrintHorizontal(textList);
                 }
+                else
+                {
+                    textList.AppendText("Куча не создана" + Environment.NewLine);
+                }
+
+                textList.SelectionStart = textList.Text.Length;
+                textList.ScrollToCaret();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show($"Ошибка в ForEach: {ex.Message}");
             }
         }
 
@@ -329,43 +349,54 @@ namespace HeapSolution
         {
             try
             {
+                textList.AppendText(Environment.NewLine + "Результат FindAll:" + Environment.NewLine);
+
                 if (type == 1 && intHeap != null && !intHeap.isEmpty)
                 {
-                    intHeap = HeapUtils<int>.FindAll(
+                    var resultHeap = HeapUtils<int>.FindAll(
                         intHeap,
                         x => x % 2 == 0,
                         chkLinkedHeap.Checked ? HeapUtils<int>.LinkedHeapConstructor : HeapUtils<int>.ArrayHeapConstructor
                     );
+
+                    resultHeap.PrintHorizontal(textList);
                 }
                 else if (type == 2 && stringHeap != null && !stringHeap.isEmpty)
                 {
-                    stringHeap = HeapUtils<string>.FindAll(
+                    var resultHeap = HeapUtils<string>.FindAll(
                         stringHeap,
                         x => x.Length % 2 == 0,
                         chkLinkedHeap.Checked ? HeapUtils<string>.LinkedHeapConstructor : HeapUtils<string>.ArrayHeapConstructor
                     );
+
+                    resultHeap.PrintHorizontal(textList);
                 }
                 else if (type == 3 && personHeap != null && !personHeap.isEmpty)
                 {
-                    personHeap = HeapUtils<Person>.FindAll(
+                    var resultHeap = HeapUtils<Person>.FindAll(
                         personHeap,
                         x => x.Age % 2 == 0,
                         chkLinkedHeap.Checked ? HeapUtils<Person>.LinkedHeapConstructor : HeapUtils<Person>.ArrayHeapConstructor
                     );
+
+                    resultHeap.PrintHorizontal(textList);
                 }
                 else
                 {
-                    MessageBox.Show("Куча не создана или пуста");
+                    textList.AppendText("Куча не создана или пуста" + Environment.NewLine);
                     return;
                 }
 
-                PrintToTextBox();
-                MessageBox.Show("Операция FindAll выполнена успешно");
+                //textList.AppendText(Environment.NewLine + "Операция FindAll завершена" + Environment.NewLine);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка в FindAll: {ex.Message}");
+                textList.AppendText("Ошибка в FindAll: " + ex.Message + Environment.NewLine);
             }
+
+            // Прокрутка вниз
+            textList.SelectionStart = textList.Text.Length;
+            textList.ScrollToCaret();
         }
 
 
@@ -453,10 +484,26 @@ namespace HeapSolution
         {
             Close();
         }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
+
+
+
+// Меняем исходную кучу
+//var items = intHeap.ToList();
+//intHeap.Clear();
+//var newintHeap = intHeap.nodes;
+//intHeap.Clear();
+//foreach (var elem in newintHeap)
+//{
+//    intHeap.Add(elem);
+////}
+//int temp = 0;
+//HeapUtils<int>.ForEach(intHeap, x => { temp = x; temp *= 2; x = temp; });
+//intHeap.Clear();
+//intHeap = newintHeap;
+//intHeap.PrintHorizontal(textList);
+//textBox.Text += "Преобразованный список (значение увеличивается в 2 раза):" + Environment.NewLine;
+//intHeap = HeapUtils<int>.ConvertAll(intHeap, elem => elem * 2, HeapUtils<int>.ArrayHeapConstructor);
+//HeapUtils<int>.ForEach(intHeap, elem => textList.Text += $"{elem}; ");
+//intHeap.PrintHorizontal(textList);

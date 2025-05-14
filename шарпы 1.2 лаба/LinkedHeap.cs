@@ -43,10 +43,9 @@ namespace HeapSolution
         }
         public void PrintHorizontal(TextBox textBox)
         {
-            textBox.Clear();
             if (_head == null)
             {
-                textBox.Text = "Куча пуста";
+                textBox.AppendText("Куча пуста" + Environment.NewLine);
                 return;
             }
 
@@ -68,7 +67,7 @@ namespace HeapSolution
             int rightChild = 2 * index + 2;
             PrintTree(textBox, elements, rightChild, level + 1);
 
-            textBox.Text += new string(' ', level * 4) + elements[index] + Environment.NewLine;
+            textBox.AppendText(new string(' ', level * 4) + elements[index] + Environment.NewLine);
 
             int leftChild = 2 * index + 1;
             PrintTree(textBox, elements, leftChild, level + 1);

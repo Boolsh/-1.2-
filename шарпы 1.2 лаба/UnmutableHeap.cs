@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static HeapSolution.Heap_Exception;
 
 namespace HeapSolution
@@ -21,6 +22,8 @@ namespace HeapSolution
         public bool isEmpty => _wrappedHeap.isEmpty;
         public IEnumerable<T> nodes => _wrappedHeap.nodes;
 
+
+        public void PrintHorizontal(TextBox textBox) { _wrappedHeap.PrintHorizontal(textBox); }
         public void Add(T node)
         {
             throw new UnmutableHeapException();
@@ -50,15 +53,5 @@ namespace HeapSolution
         {
             return GetEnumerator();
         }
-
-        // Дополнительные методы для удобства
-        public T PeekMax()
-        {
-            if (isEmpty)
-                throw new InvalidOperationException("Heap is empty");
-            return _wrappedHeap.nodes.First();
-        }
-
-
     }
 }

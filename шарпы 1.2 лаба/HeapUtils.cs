@@ -13,7 +13,7 @@ namespace HeapSolution
         public delegate bool CheckDelegate<T>(T date);
         public delegate IHeap<T> HeapConstructorDelegate<T>(IEnumerable<T> collection);
         public delegate void ActionDelegate<T>(T date);
-        public delegate TO ConvertDelegate<TI, TO>(TI elem);
+        public delegate T1 ConvertDelegate<T1>(T1 elem);
         public static bool Exists<T>(IHeap<T> heap, CheckDelegate<T> check) 
         {
             foreach (var i in heap)
@@ -36,15 +36,19 @@ namespace HeapSolution
             return constructor(filteredItems);
         }
 
-        public static void ForEach(IHeap<T> heap, ActionDelegate<T> actDel) 
+        public static void ForEach(IHeap<T> heap, ActionDelegate<T> actDel)
         {
+            if (heap is UnmutableHeap<T>)
+            {
+                throw new InvalidOperationException("Нельзя изменять UnmutableHeap");
+            }
             foreach (var i in heap)
                 actDel(i);
         }
-        //public static IList<TO> ConvertAll<TI, TO>(IList<TI> inputList, ConvertDelegate<TI, TO> converter, HeapConstructorDelegate<TO> constructor)
+        //public static IHeap<TO> ConvertAll<TI, TO>(IList<TI> inputHeap, ConvertDelegate<T1> converter, HeapConstructorDelegate<TO> constructor)
         //{
-        //    LinkedList<TO> convertedList = new LinkedList<TO>();
-        //    foreach (var item in inputList)
+        //    LinkedHeap<TO> convertedList = new LinkedHeap<TO>();
+        //    foreach (var item in inputHeap)
         //    {
         //        convertedList.Add(converter(item));
         //    }

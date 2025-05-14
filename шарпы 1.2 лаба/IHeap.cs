@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace HeapSolution
 {
     internal interface IHeap<T> : IEnumerable<T>
     {
+        void PrintHorizontal(TextBox textBox);
         int Count { get; }
         bool isEmpty { get; }
         IEnumerable<T> nodes { get; }
